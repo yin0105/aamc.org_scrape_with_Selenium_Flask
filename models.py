@@ -8,12 +8,12 @@ import phonenumbers
 
 # # Form ORM
 class UserForm(FlaskForm):    
-        name = TextField(' Name :   ', validators=[InputRequired(),Length(max=50)] )
+        name = TextField(' Name :   ', validators=[InputRequired(),Length(max=30)] )
+        user_id = TextField(' User ID :   ', validators=[InputRequired(),Length(max=30)] )
+        password = TextField(' Password :   ', validators=[InputRequired(),Length(max=30)] )
         email = TextField(' Email :   ', validators=[Email(), InputRequired(), ])
-        phone = TextField('Phone :   ', validators=[InputRequired()])
-        exam = SelectField('Exam :   ', choices = [('0', 'STEP 1'), ('1', 'STEP 2'), ('2', 'STEP 3')])
-        dates = TextField('DatePicker : ', validators=[InputRequired()])
-        country = SelectField('Country : ', choices = [('AFGHANISTAN' , 'AFGHANISTAN'), ('UNITED ARAB EMIRATES' , 'UNITED ARAB EMIRATES'), ('ARGENTINA' , 'ARGENTINA'), ('ARGENTINA' , 'ARGENTINA'), ('ARMENIA' , 'ARMENIA'), ('AMERICAN SAMOA' , 'AMERICAN SAMOA'), ('AUSTRALIA' , 'AUSTRALIA'), ('BANGLADESH' , 'BANGLADESH'), ('BOLIVIA' , 'BOLIVIA'), ('BRAZIL' , 'BRAZIL'), ('CANADA' , 'CANADA'), ('SWITZERLAND' , 'SWITZERLAND'), ('CHILE' , 'CHILE'), ('CHINA' , 'CHINA'), ('COLOMBIA' , 'COLOMBIA'), ('COSTA RICA' , 'COSTA RICA'), ('CYPRUS' , 'CYPRUS'), ('CZECH REPUBLIC' , 'CZECH REPUBLIC'), ('GERMANY' , 'GERMANY'), ('DENMARK' , 'DENMARK'), ('DOMINICAN REPUBLIC' , 'DOMINICAN REPUBLIC'), ('EGYPT' , 'EGYPT'), ('SPAIN' , 'SPAIN'), ('FINLAND' , 'FINLAND'), ('FRANCE' , 'FRANCE'), ('UNITED KINGDOM' , 'UNITED KINGDOM'), ('GHANA' , 'GHANA'), ('GREECE' , 'GREECE'), ('GUATEMALA' , 'GUATEMALA'), ('GUAM' , 'GUAM'), ('HONG KONG' , 'HONG KONG'), ('HONG KONG' , 'HONG KONG'), ('CROATIA' , 'CROATIA'), ('CROATIA' , 'CROATIA'), ('HUNGARY' , 'HUNGARY'), ('INDONESIA' , 'INDONESIA'), ('INDIA' , 'INDIA'), ('IRELAND' , 'IRELAND'), ('ISRAEL' , 'ISRAEL'), ('ITALY' , 'ITALY'), ('JORDAN' , 'JORDAN'), ('JAPAN' , 'JAPAN'), ('KENYA' , 'KENYA'), (' KOREA REPUBLIC OF' , ' KOREA REPUBLIC OF'), ('KUWAIT' , 'KUWAIT'), ('LEBANON' , 'LEBANON'), ('SRI LANKA' , 'SRI LANKA'), ('LITHUANIA' , 'LITHUANIA'), ('MEXICO' , 'MEXICO'), ('NORTHERN MARIANA ISLANDS' , 'NORTHERN MARIANA ISLANDS'), ('MAURITIUS' , 'MAURITIUS'), ('MALAYSIA' , 'MALAYSIA'), ('NETHERLANDS' , 'NETHERLANDS'), ('NEPAL' , 'NEPAL'), ('NEW ZEALAND' , 'NEW ZEALAND'), ('OMAN' , 'OMAN'), ('PAKISTAN' , 'PAKISTAN'), ('PERU' , 'PERU'), ('PHILIPPINES' , 'PHILIPPINES'), ('PUERTO RICO' , 'PUERTO RICO'), ('PORTUGAL' , 'PORTUGAL'), ('QATAR' , 'QATAR'), ('SAUDI ARABIA' , 'SAUDI ARABIA'), ('SINGAPORE' , 'SINGAPORE'), ('THAILAND' , 'THAILAND'), ('TRINIDAD AND TOBAGO' , 'TRINIDAD AND TOBAGO'), ('TURKEY' , 'TURKEY'), ('TAIWAN' , 'TAIWAN'), ('UGANDA' , 'UGANDA'), ('UNITED STATES' , 'UNITED STATES'), ('VENEZUELA' , 'VENEZUELA'), ('VIRGIN ISLANDS (U.S.)' , 'VIRGIN ISLANDS (U.S.)'), ('SOUTH AFRICA' , 'SOUTH AFRICA'), ('ZIMBABWE' , 'ZIMBABWE')])
+        phone = TextField(' Phone :   ', validators=[InputRequired()])
+        dates = TextField(' Dates : ', validators=[InputRequired()])
         submit = SubmitField('Submit')
         id = HiddenField('id')
 

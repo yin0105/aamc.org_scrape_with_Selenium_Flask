@@ -19,7 +19,7 @@ class Config(object):
 app = Flask(__name__)
 app.config.from_object(Config)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/usmle'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/aamc'
 app.config['SECRET_KEY'] = "3489wfksf93r2k3lf9sdjkfe9t2j3krl"
 
 Bootstrap(app)
@@ -45,24 +45,24 @@ class User(db.Model, SerializerMixin):
 
     serialize_only = ('name', 'email', 'phone', 'exam', 'dates', 'country', 'locations')
     
-    name =  db.Column(db.String(50), nullable = False) 
+    name =  db.Column(db.String(30), nullable = False) 
+    user_id =  db.Column(db.String(30), nullable = False) 
+    password =  db.Column(db.String(30), nullable = False) 
     email = db.Column(db.String(30), nullable = False) 
     phone = db.Column(db.String(20), nullable = False) 
-    exam = db.Column(db.Integer, nullable = False)
     dates = db.Column(db.String(500), nullable = False)
-    country = db.Column(db.String(30), nullable = False)
     locations = db.Column(db.String(), nullable = False) 
     status = db.Column(db.Integer, default = 0) 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
 
-    def __init__(self, name, email, phone, exam, dates, country, locations):
+    def __init__(self, name, user_id, password, email, phone, dates, locations):
         self.name = name
+        self.user_id = user_id
+        self.password = password        
         self.email = email
         self.phone = phone
-        self.exam = exam
         self.dates = dates
-        self.country = country
         self.locations = locations
 
 
@@ -130,22 +130,23 @@ def add_user():
             flash('Please enter all the fields', 'error')
         else:
             str = ''
-            for i in range(len(request.form.getlist('td_location[]'))):
-                if request.form.getlist('td_location[]')[i]:
+            for i in range(len(request.form.getlist('td_search[]'))):
+                if request.form.getlist('td_search[]')[i]:
                     if str != '' :
                         str += ','
-                    str += '{"l": "' + request.form.getlist('td_location[]')[i] +'", '
-                    str += '"c": "' + request.form.getlist('td_center_number[]')[i] +'"}'
+                    str += '{"s": "' + request.form.getlist('td_search[]')[i] +'", '
+                    str += '"m": "' + request.form.getlist('td_miles[]')[i] +'", '
+                    str += '"t": "' + request.form.getlist('td_time[]')[i] +'"}'
             str = '{"locationList":[' + str +']}'
 
-            user_ = User(request.form['name'], request.form['email'], request.form['phone'], request.form['exam'], request.form['dates'], request.form['country'], str)
+            user_ = User(request.form['name'], request.form['user_id'], request.form['password'], request.form['email'], request.form['phone'], request.form['dates'], str)
             
             db.session.add(user_)
             db.session.commit()
             flash('Record was successfully added')
             return redirect(url_for('admin'))   
     
-    form.locations = [{"location": "", "center_number": ""}]
+    form.locations = [{"search": "", "miles": "", "time": ""}]
     return render_template('user.html', form=form, )
 
 
@@ -277,12 +278,6 @@ def status_initialize():
     return
 
 
-def get_state_list():
-    states = PostalCode.query.all()
-    for state_ in states:
-        state_dict[state_.state.lower()] = state_.state_code
-    return
-
 def get_proxies_list():
     if os.environ.get('FREE_PROXY') != "true":
         try:
@@ -318,6 +313,5 @@ def get_proxies_list():
 proxies_file = open('proxies.txt', 'r') 
 if __name__ == '__main__':
     status_initialize()
-    get_state_list()
     get_proxies_list()
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5200, debug=True)
