@@ -43,7 +43,7 @@ class country_3(db.Model):
 class User(db.Model, SerializerMixin):  
     __tablename__ = 'user'
 
-    serialize_only = ('name', 'email', 'phone', 'exam', 'dates', 'country', 'locations')
+    serialize_only = ('name', 'user_id', 'password', 'email', 'phone', 'dates', 'locations')
     
     name =  db.Column(db.String(30), nullable = False) 
     user_id =  db.Column(db.String(30), nullable = False) 
@@ -160,16 +160,17 @@ def edit_user():
             flash('Please enter all the fields', 'error')
         else:
             str = ''
-            for i in range(len(request.form.getlist('td_location[]'))):
-                if request.form.getlist('td_location[]')[i]:
+            for i in range(len(request.form.getlist('td_search[]'))):
+                if request.form.getlist('td_search[]')[i]:
                     if str != '' :
                         str += ','
-                    str += '{"l": "' + request.form.getlist('td_location[]')[i] +'", '
-                    str += '"c": "' + request.form.getlist('td_center_number[]')[i] +'"}'
+                    str += '{"s": "' + request.form.getlist('td_search[]')[i] +'", '
+                    str += '"m": "' + request.form.getlist('td_miles[]')[i] +'", '
+                    str += '"t": "' + request.form.getlist('td_time[]')[i] +'"}'
             str = '{"locationList":[' + str +']}'
            
             
-            db.session.query(User).filter_by(id = request.form['id']).update({User.name: request.form['name'], User.email: request.form['email'], User.phone: request.form['phone'], User.exam: request.form['exam'], User.dates: request.form['dates'], User.country: request.form['country'], User.locations: str}, synchronize_session = False)
+            db.session.query(User).filter_by(id = request.form['id']).update({User.name: request.form['name'], User.user_id: request.form['user_id'], User.password: request.form['password'], User.email: request.form['email'], User.phone: request.form['phone'], User.dates: request.form['dates'], User.locations: str}, synchronize_session = False)
             db.session.commit()
             flash('Record was successfully updated')
             return redirect(url_for('admin'))   
@@ -206,26 +207,6 @@ def view_log():
 @app.route('/calendar', methods=['GET', 'POST'])
 def calendar():
     return render_template('calendar.html')
-
-
-@app.route('/ajax_get_countries_list/<int:examID>', methods=['GET', 'POST'])
-def ajax_get_countries_list(examID):
-    countries = []
-    if examID == 0:
-        countries = country_1.query.order_by(country_1.country)
-    elif examID == 1:
-        countries = country_2.query.order_by(country_2.country)
-    elif examID == 2:
-        countries = country_3.query.order_by(country_3.country)
-
-    result = ""
-    for country in countries:
-        result += "<option value='" + country.country
-        if country.country == request.args.get('country', ''):
-            result += "' selected='selected"
-        result += "'>" + country.country + "</option>"
-
-    return result
 
 
 @app.route('/ajax_get_user_status', methods=['GET', 'POST'])
