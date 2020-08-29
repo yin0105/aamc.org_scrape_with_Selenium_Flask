@@ -32,33 +32,6 @@ def my_logging(log, f_name, msg):
     log.propagate = False
 
 
-def find_error(browser):
-    try:
-        elem = browser.find_element_by_xpath("/html/body/div[2]/div[3]/div/div/div[3]/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div[3]")
-        return "System Error"
-    except:
-        pass
-
-    try:
-        elem = browser.find_element_by_xpath("/html/body/div[2]/div[3]/div/div/div[3]/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div[3]/div")
-        return "already been taken by others"
-    except:
-        pass
-
-    try:
-        elem = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[2]/div/div[2]/div/div/div[3]/div/div[4]/div/div[2]/table/tbody/tr/td[3]/div")
-        return "This location is fully booked for this date. Please select a different location or date."
-    except:
-        pass
-
-    try:
-        elem = browser.find_element_by_xpath("//html/body/div[2]/div[3]/div/div/div[3]/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div[3]/div")
-        return "Unexpected error"
-    except:
-        pass
-
-    return "ok"
-
 def find_elem(collection, bb, ee, xpath):
     print("find_elem")
     for i in range(5):
@@ -307,16 +280,16 @@ class MyThread(Thread):
                 elem.click()
                 time.sleep(2)
 
-                # Open Calendar
-                elem, f = find_elem(False, browser, browser, "/html/body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[1]/div/div/div[2]/div[2]/div/div/div/div/img")
-                if f == False : raise Exception("Not found element")
-                elem.click()
-                time.sleep(5)
-
-                elems, f = find_elem(True, browser, browser, "//table[contains(@class, 'calendar')]//td[@data-handler='selectDay']/a")
-                if f == False : raise Exception("Not found element")
-
                 while (proxy_status[self.name] == 1 or proxy_status[self.name] == 4) and time.perf_counter() - start_time < proxy_period * 60:
+                    # Open Calendar
+                    elem, f = find_elem(False, browser, browser, "/html/body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[1]/div/div/div[2]/div[2]/div/div/div/div/img")
+                    if f == False : raise Exception("Not found element")
+                    elem.click()
+                    time.sleep(5)
+
+                    elems, f = find_elem(True, browser, browser, "//table[contains(@class, 'calendar')]//td[@data-handler='selectDay']/a")
+                    if f == False : raise Exception("Not found element")
+
                     for elem in elems:
                         ddd_1 = " ".join(re.split(" +", elem.get_attribute("aria-label"))[:3])
                         print("ddd_1 = " + ddd_1)
@@ -361,109 +334,110 @@ class MyThread(Thread):
                                         send_ok = False
                                         while (proxy_status[self.name] == 1 or proxy_status[self.name] == 4) and time.perf_counter() - start_time < proxy_period * 60:
                                             elems, f = find_elem(True, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[3]/div/div[1]/div/span/table/tbody/tr/td[3]/span[3]/input")
-                                            for elem in elems:
-                                                ######## break ##############
-                                                if proxy_status[self.name] == 0: 
-                                                    browser.close()
-                                                    my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
-                                                    return
-                                                while True:
-                                                    try:
-                                                        elem.location_once_scrolled_into_view
-                                                        break
-                                                    except:
-                                                        time.sleep(1)
-                                                ######## break ##############
-                                                if proxy_status[self.name] == 0: 
-                                                    browser.close()
-                                                    my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
-                                                    return
-                                                tr = elem.find_element_by_xpath("./ancestor::tr")
-                                                tc_name = tr.find_element_by_xpath("./td[2]/div[1]").text
-                                                tc_address = ", ".join(tr.find_element_by_xpath("./td[2]/div[2]").text.splitlines()[:-1])
-                                                mile = tr.find_element_by_xpath("./td[4]").text
-                                                mile = float(re.split(" +", mile)[0])
-                                                print("tc_name: " + tc_name)
-                                                print("tc_address: " + tc_address)
-                                                print("mile: " + str(mile))
-                                                tt = elem.get_attribute("value")
-                                                if tt.find("Select") > -1:                                                
-                                                    elem.click()
-                                                    time.sleep(1)
-                                                    tts = elem.find_elements_by_xpath("./ancestor::tr/td[3]/span[3]/div/table/tbody/tr/td/input")
-                                                    for ttt in tts:
-                                                        ######## break ##############
-                                                        if proxy_status[self.name] == 0: 
-                                                            browser.close()
-                                                            my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
-                                                            return
-                                                        tttt = ttt.get_attribute("value")
-                                                        print("time: " + str(tttt) + "  " + ("0" + location["t"])[-5:] )
-                                                        if location["t"] == "" or (("0" + location["t"])[-5:] == str(tttt)) :
-                                                            print("time OK")
-                                                            if location["m"] == "" or (float(location["m"]) >= mile):                                                            
-
-                                                                msg = msg.replace("%NAME", self.user["name"]).replace("%DATE", ddd_1).replace("%LOCATION", tc_address)
-                                                                if send_email(self.log, msg, self.name, self.user["email"], self.user["phone"]): 
-                                                                    send_ok = True   
-
-                                                                    ttt.click()
-                                                                    time.sleep(5)                                                             
-
-                                                                    elem, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/div/div[3]/div/div/input[2]")
-                                                                    if f == False : raise Exception("Not found Button")
-                                                                    elem.click()
-                                                                    time.sleep(2)
-
-                                                                    if agree == "true":
-                                                                        elem, f = find_elem(False, browser, browser, "//body/div[10]/div[2]/div[2]/div/div/input[2]")
-                                                                    else:
-                                                                        elem, f = find_elem(False, browser, browser, "//body/div[10]/div[2]/div[2]/div/div/input[1]")
-                                                                    if f == False : raise Exception("Not found Button")
-                                                                    elem.location_once_scrolled_into_view
-                                                                    elem.click()
-                                                                    time.sleep(2)
-                                                                    proxy_status[self.name] = 2
-                                                                    my_logging(self.log, self.name, " Message sent.") 
-                                                                    browser.close()
-                                                                    return
-                                                                
-                                                                    
-
-                                                                
-                                                                
-                                                                
-                                                    
-                                                else:
-                                                    print("time: " + str(tt))
-                                                    if location["t"] != "" and str(tt) != location["t"]: continue
-                                                    print("OK")
-                                                    if location["m"] == "" or (float(location["m"]) >= mile):                                                        
-
-                                                        msg = msg.replace("%NAME", self.user["name"]).replace("%DATE", ddd_1).replace("%LOCATION", tc_address)
-                                                        if send_email(self.log, msg, self.name, self.user["email"], self.user["phone"]): 
-                                                            send_ok = True                                   
-
-                                                            elem.click()
-                                                            time.sleep(5)                             
-
-                                                            elem, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/div/div[3]/div/div/input[2]")
-                                                            if f == False : raise Exception("Not found Button")
-                                                            elem.click()
-                                                            time.sleep(2)
-
-                                                            if agree == "true":
-                                                                elem, f = find_elem(False, browser, browser, "//body/div[10]/div[2]/div[2]/div/div/input[2]")
-                                                            else:
-                                                                elem, f = find_elem(False, browser, browser, "//body/div[10]/div[2]/div[2]/div/div/input[1]")
-                                                            if f == False : raise Exception("Not found Button")
+                                            if f:
+                                                for elem in elems:
+                                                    ######## break ##############
+                                                    if proxy_status[self.name] == 0: 
+                                                        browser.close()
+                                                        my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                        return
+                                                    while True:
+                                                        try:
                                                             elem.location_once_scrolled_into_view
-                                                            elem.click()
-                                                            time.sleep(2)
-                                                            proxy_status[self.name] = 2
-                                                            my_logging(self.log, self.name, " Message sent.") 
-                                                            browser.close()
-                                                            return
+                                                            break
+                                                        except:
+                                                            time.sleep(1)
+                                                    ######## break ##############
+                                                    if proxy_status[self.name] == 0: 
+                                                        browser.close()
+                                                        my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                        return
+                                                    tr = elem.find_element_by_xpath("./ancestor::tr")
+                                                    tc_name = tr.find_element_by_xpath("./td[2]/div[1]").text
+                                                    tc_address = ", ".join(tr.find_element_by_xpath("./td[2]/div[2]").text.splitlines()[:-1])
+                                                    mile = tr.find_element_by_xpath("./td[4]").text
+                                                    mile = float(re.split(" +", mile)[0])
+                                                    print("tc_name: " + tc_name)
+                                                    print("tc_address: " + tc_address)
+                                                    print("mile: " + str(mile))
+                                                    tt = elem.get_attribute("value")
+                                                    if tt.find("Select") > -1:                                                
+                                                        elem.click()
+                                                        time.sleep(1)
+                                                        tts = elem.find_elements_by_xpath("./ancestor::tr/td[3]/span[3]/div/table/tbody/tr/td/input")
+                                                        for ttt in tts:
+                                                            ######## break ##############
+                                                            if proxy_status[self.name] == 0: 
+                                                                browser.close()
+                                                                my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                                return
+                                                            tttt = ttt.get_attribute("value")
+                                                            print("time: " + str(tttt) + "  " + ("0" + location["t"])[-5:] )
+                                                            if location["t"] == "" or (("0" + location["t"])[-5:] == str(tttt)) :
+                                                                print("time OK")
+                                                                if location["m"] == "" or (float(location["m"]) >= mile):                                                            
+
+                                                                    msg = msg.replace("%NAME", self.user["name"]).replace("%DATE", ddd_1).replace("%LOCATION", tc_address)
+                                                                    if send_email(self.log, msg, self.user["name"], self.user["email"], self.user["phone"]): 
+                                                                        send_ok = True   
+
+                                                                        ttt.click()
+                                                                        time.sleep(5)                                                             
+
+                                                                        elem, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/div/div[3]/div/div/input[2]")
+                                                                        if f == False : raise Exception("Not found Button")
+                                                                        elem.click()
+                                                                        time.sleep(2)
+
+                                                                        if agree == "true":
+                                                                            elem, f = find_elem(False, browser, browser, "//body/div[10]/div[2]/div[2]/div/div/input[2]")
+                                                                        else:
+                                                                            elem, f = find_elem(False, browser, browser, "//body/div[10]/div[2]/div[2]/div/div/input[1]")
+                                                                        if f == False : raise Exception("Not found Button")
+                                                                        elem.location_once_scrolled_into_view
+                                                                        elem.click()
+                                                                        time.sleep(2)
+                                                                        proxy_status[self.name] = 2
+                                                                        my_logging(self.log, self.name, " Message sent.") 
+                                                                        browser.close()
+                                                                        return
+                                                                    
+                                                                        
+
+                                                                    
+                                                                    
+                                                                    
+                                                        
+                                                    else:
+                                                        print("time: " + str(tt))
+                                                        if location["t"] != "" and str(tt) != location["t"]: continue
+                                                        print("OK")
+                                                        if location["m"] == "" or (float(location["m"]) >= mile):                                                        
+
+                                                            msg = msg.replace("%NAME", self.user["name"]).replace("%DATE", ddd_1).replace("%LOCATION", tc_address)
+                                                            if send_email(self.log, msg, self.name, self.user["email"], self.user["phone"]): 
+                                                                send_ok = True                                   
+
+                                                                elem.click()
+                                                                time.sleep(5)                             
+
+                                                                elem, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/div/div[3]/div/div/input[2]")
+                                                                if f == False : raise Exception("Not found Button")
+                                                                elem.click()
+                                                                time.sleep(2)
+
+                                                                if agree == "true":
+                                                                    elem, f = find_elem(False, browser, browser, "//body/div[10]/div[2]/div[2]/div/div/input[2]")
+                                                                else:
+                                                                    elem, f = find_elem(False, browser, browser, "//body/div[10]/div[2]/div[2]/div/div/input[1]")
+                                                                if f == False : raise Exception("Not found Button")
+                                                                elem.location_once_scrolled_into_view
+                                                                elem.click()
+                                                                time.sleep(2)
+                                                                proxy_status[self.name] = 2
+                                                                my_logging(self.log, self.name, " Message sent.") 
+                                                                browser.close()
+                                                                return
 
                                             show_more, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[3]/div/div[1]/div/p[1]/a")
                                             if f == False : break
@@ -474,16 +448,17 @@ class MyThread(Thread):
                                             if f == False : 
                                                 while not f:
                                                     overlay, f = find_elem(False, browser, browser, "//*[@class='ui-widget-overlay ui-front']")
+                                                    time.sleep(1)
                                             print("overlay on")
                                             while f:
                                                 overlay, f = find_elem(False, browser, browser, "//*[@class='ui-widget-overlay ui-front']")
+                                                time.sleep(1)
                                             print("overlay off")
                                             # browser.find_element_by_tag_name('body').send_keys(Keys.HOME)
                                             time.sleep(2)
                                             # if location["c"] != "":
                                             #     if tc_address.find(location["c"]) < 0 :continue
 
-                                        time.sleep(3000)
 
               
 
