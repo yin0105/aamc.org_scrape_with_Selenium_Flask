@@ -62,13 +62,15 @@ def send_email(log, msg, se_name, se_email, se_phone):
     try:
         smtpObj = smtplib.SMTP('smtp.gmail.com: 587')#('smtp-mail.outlook.com', 587)
     except Exception as e:
+        print(str(e))
         print(e)
-        my_logging(log, se_name, e)#'SMTP TSL connection failed.  trying SMTP SSL connection...\n' + e)
+        my_logging(log, se_name, str(e))#'SMTP TSL connection failed.  trying SMTP SSL connection...\n' + e)
         try:
             smtpObj = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         except Exception as e:
+            print(str(e))
             print(e)
-            my_logging(log, se_name, 'SMTP SSL connection failed.  S M T P   F A I L E D\n' + e)
+            my_logging(log, se_name, 'SMTP SSL connection failed.  S M T P   F A I L E D\n' + str(e))
             return False
                                             
     try:
@@ -80,8 +82,9 @@ def send_email(log, msg, se_name, se_email, se_phone):
         my_logging(log, se_name, 'email::  to:' + se_email + ' msg: ' + msg)
         sended = True
     except Exception as e:
+        print(str(e))
         print(e)
-        my_logging(log, se_name, 'SMTP Login failed.\n' + e)
+        my_logging(log, se_name, 'SMTP Login failed.\n' + str(e))
                                                     
 
     # # ################### CALL ################################
@@ -95,8 +98,9 @@ def send_email(log, msg, se_name, se_email, se_phone):
             my_logging(log, se_name, 'CALL::  to:' + se_phone + ' msg: ' + msg)
             sended = True
     except  Exception as e:
+        print(str(e))
         print(e)
-        my_logging(log, se_name, e)
+        my_logging(log, se_name, str(e))
 
     # # ################### SMS ################################
     print(twilio_phone_number)
@@ -109,8 +113,9 @@ def send_email(log, msg, se_name, se_email, se_phone):
             my_logging(log, se_name, 'SMS::  to:' + se_phone + ' msg: ' + msg)
             sended = True
     except  Exception as e:
+        print(str(e))
         print(e)
-        my_logging(log, se_name, e)  
+        my_logging(log, se_name,str(e))
 
     return sended     
             
@@ -145,8 +150,8 @@ class MyThread(Thread):
             options = webdriver.ChromeOptions ( ) 
             options.add_argument('--log-level=0')
             options.add_argument('ignore-certificate-errors')
-            my_logging(self.log, self.name, "USE_PROXY = " + os.environ.get('USE_PROXY'))
-            my_logging(self.log, self.name, "FREE_PROXY = " + os.environ.get('FREE_PROXY'))
+            my_logging(self.log, self.user["name"], "USE_PROXY = " + os.environ.get('USE_PROXY'))
+            my_logging(self.log, self.user["name"], "FREE_PROXY = " + os.environ.get('FREE_PROXY'))
             
             if os.environ.get('USE_PROXY') == "true":
                 options.add_argument('--proxy-server=%s' % proxy)
@@ -160,11 +165,15 @@ class MyThread(Thread):
             action = ActionChains(browser)
             
             if os.environ.get('USE_PROXY') == "true":
-                my_logging(self.log, self.name, 'now using proxy - ' + proxies_list[proxy_index])
+                my_logging(self.log, self.user["name"], 'now using proxy - ' + proxies_list[proxy_index])
 
             try:
                 # Sign in Button
-                
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+
                 elem, f = find_elem(False, browser, browser, "/html/body/div[4]/nav/header/div/div/div[2]/div[2]/ul/li[7]/a[contains(text(), 'Sign In')]")
                 if f == False :
                     # elem, f = find_elem(False, browser, browser, "//body/div[1]/div/div/header/div/div[1]/div/div/a")
@@ -172,6 +181,12 @@ class MyThread(Thread):
                 else:
                     print("True")
                 elem.click()
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
 
                 # Username 
                 elem, f = find_elem(False, browser, browser, "//body/oneaamc-root/oneaamc-layout/div/oneaamc-login-route/oneaamc-login-container/div/div/div[1]/div/oneaamc-authentication-form/div/form/div/div[1]/oneaamc-callback-input/mat-form-field/div/div[1]/div[3]/input")
@@ -200,20 +215,29 @@ class MyThread(Thread):
                 elem, f = find_elem(False, browser, browser, "//body/oneaamc-root/oneaamc-layout/div/oneaamc-login-route/oneaamc-login-container/div/div/div[1]/div/oneaamc-authentication-form/div/form/div/div[3]/button")
                 if f == False : raise Exception("Not found element")
                 elem.click() 
-                time.sleep(10)         
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
+                time.sleep(10)    
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                         
 
                 # Feedback - No, thanks Button
                 elem, f = find_elem(False, browser, browser, "//body/div[12]/div/div/section[3]/button[2]")                
                 if f : elem.click()
                 print("After Feedback")
-                # Students & Residents
-                # elem, f = find_elem(False, browser, browser, "//body/div[1]/div/aside/div/nav/ul/li[1]/a")
-                # if f == False : raise Exception("Not found element")
-                # print("After Students")
-                # elem.click()
-                # time.sleep(10)
-                # print("Begin")
 
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
                 
                 # Applying to Medical School
                 elem, f = find_elem(False, browser, browser, "//body/div[4]/header/div/div[1]/div[1]/div/div/div[2]/div/p[contains(text(),'Applying to Medical School')]")
@@ -224,6 +248,12 @@ class MyThread(Thread):
                 print("After Action 1")
                 print("ok 1")
                 time.sleep(1)
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+
                 # Register for the MCAT Exam
                 elem, f = find_elem(False, browser, browser, "//div[1]/div[2]/div[2]/div/div/div[2]/ul/li[4]/a[contains(text(),'Register for the MCAT Exam')]")
                 if f == False : raise Exception("Not found element")
@@ -231,23 +261,54 @@ class MyThread(Thread):
 
                 
                 browser.get(elem.get_attribute("href"))
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
                 time.sleep(10)
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
 
                 # Feedback - No, thanks Button
                 elem, f = find_elem(False, browser, browser, "//body/div[13]/div/div/section[3]/button[2]")                
                 if f : elem.click()
                 print("After Feedback")
 
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return                    
+
                 elem, f = find_elem(False, browser, browser, "/html/body/div[6]/div[3]/div[2]/div/div/div[2]/div/div[2]/div/div/div[1]/span/a")
                 if f == False : raise Exception("Not found element")
                 elem.click()
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
 
                 original_window = browser.current_window_handle
 
                 for window_handle in browser.window_handles:
                     if window_handle != original_window:
                         browser.switch_to.window(window_handle)
-                        break
+                    else:
+                        browser.close()
+
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
 
                 elem, f = find_elem(False, browser, browser, "//div[@id='loading-spinner']")
                 if not f:
@@ -256,10 +317,22 @@ class MyThread(Thread):
                         print("f1 = " + str(f))
                         time.sleep(1)
                 
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
+                
                 while f:
                     print("f2 = " + str(f))
                     elem, f = find_elem(False, browser, browser, "//div[@id='loading-spinner']")
                     time.sleep(1)
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
                 
 
                 
@@ -267,30 +340,119 @@ class MyThread(Thread):
                 elem, f = find_elem(False, browser, browser, "/html/body/mcat-root/div/div/ui-view/home/div/ui-view/dashboard/div/div[1]/div[2]/div[4]/a")
                 if f == False : raise Exception("Not found element")
                 elem.click()
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
                 time.sleep(5)
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
 
                 elem, f = find_elem(False, browser, browser, "/html/body/div[5]/div/div[3]/div[1]/div[3]/form[2]/div/div[2]/a")
                 if f == False : raise Exception("Not found element")
                 elem.click()
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
                 time.sleep(5)
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
 
                 # Reschedule
                 elem, f = find_elem(False, browser, browser, "/html/body/div[5]/div/div[3]/div[1]/div[3]/form/table/tbody/tr[2]/td[4]/input[1]")
                 if f == False : raise Exception("Not found element")
                 elem.click()
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
                 time.sleep(2)
+
+                if proxy_status[self.name] == 0: 
+                    browser.close()
+                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                    return
+                    
 
                 while (proxy_status[self.name] == 1 or proxy_status[self.name] == 4) and time.perf_counter() - start_time < proxy_period * 60:
                     # Open Calendar
                     elem, f = find_elem(False, browser, browser, "/html/body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[1]/div/div/div[2]/div[2]/div/div/div/div/img")
                     if f == False : raise Exception("Not found element")
                     elem.click()
+
+                    if proxy_status[self.name] == 0: 
+                        browser.close()
+                        my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                        return
+                        
                     time.sleep(5)
+
+                    if proxy_status[self.name] == 0: 
+                        browser.close()
+                        my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                        return
+                        
 
                     elems, f = find_elem(True, browser, browser, "//table[contains(@class, 'calendar')]//td[@data-handler='selectDay']/a")
                     if f == False : raise Exception("Not found element")
 
-                    for elem in elems:
+                    if proxy_status[self.name] == 0: 
+                        browser.close()
+                        my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                        return
+                        
+
+                    for elem_index in range(len(elems)):
+                        # Open Calendar
+                        elem_, f = find_elem(False, browser, browser, "/html/body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[1]/div/div/div[2]/div[2]/div/div/div/div/img")
+                        if f == False : raise Exception("Not found element")
+                        elem_.location_once_scrolled_into_view
+                        time.sleep(2)
+                        print("calendar clicked.")
+                        elem_.click()
+
+                        if proxy_status[self.name] == 0: 
+                            browser.close()
+                            my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                            return
+                            
+                        time.sleep(5)
+
+                        if proxy_status[self.name] == 0: 
+                            browser.close()
+                            my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                            return
+                            
+
+                        elems, f = find_elem(True, browser, browser, "//table[contains(@class, 'calendar')]//td[@data-handler='selectDay']/a")
+                        if f == False : raise Exception("Not found element")
+
+                        if proxy_status[self.name] == 0: 
+                            browser.close()
+                            my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                            return
+
+                        elem = elems[elem_index]
+
+
+                        print("elem ::::::::::::::::::::::::::::::::::::::::")
+                        
+                        print("After sleep")
                         ddd_1 = " ".join(re.split(" +", elem.get_attribute("aria-label"))[:3])
                         print("ddd_1 = " + ddd_1)
                         for dd in self.user["dates"]:
@@ -303,26 +465,48 @@ class MyThread(Thread):
                                 print("::::::::::::::::::::::::::::::::::::::OK")
                                 elem.click()
 
+                                if proxy_status[self.name] == 0: 
+                                    browser.close()
+                                    my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                    return
+                                    
+
                                 for key, location_list in self.user["locations"].items():
+                                    print("ok")
+                                    print("len = " + str(len(location_list)))
                                     for location in location_list:
                                         print("location = " + location["s"])
                                         # print("location : " + location["l"] + " , center_number : " + location["c"])
                                         # Search Text                            
                                         elem, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[1]/div/div/div[2]/div[1]/div/input")
                                         if f == False : raise Exception("Not found Search TextBox ")
+                                        elem.location_once_scrolled_into_view
+                                        time.sleep(2)
                                         elem.clear()
                                         elem.send_keys(location["s"])
                                         
                                         ######## break ##############
                                         if proxy_status[self.name] == 0: 
                                             browser.close()
-                                            my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                            my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
                                             return
                                         # Search Button            
                                         elem, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[1]/div/div/div[2]/div[3]/span/input[2]")
                                         if f == False : raise Exception("Not found Search Button")
                                         elem.click()
+
+                                        if proxy_status[self.name] == 0: 
+                                            browser.close()
+                                            my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                            return
+                                            
                                         time.sleep(5)
+
+                                        if proxy_status[self.name] == 0: 
+                                            browser.close()
+                                            my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                            return
+                                            
 
                                         # Search Time
                                 
@@ -334,12 +518,17 @@ class MyThread(Thread):
                                         send_ok = False
                                         while (proxy_status[self.name] == 1 or proxy_status[self.name] == 4) and time.perf_counter() - start_time < proxy_period * 60:
                                             elems, f = find_elem(True, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[3]/div/div[1]/div/span/table/tbody/tr/td[3]/span[3]/input")
+                                            if proxy_status[self.name] == 0: 
+                                                browser.close()
+                                                my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                return
+                                                
                                             if f:
                                                 for elem in elems:
                                                     ######## break ##############
                                                     if proxy_status[self.name] == 0: 
                                                         browser.close()
-                                                        my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                        my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
                                                         return
                                                     while True:
                                                         try:
@@ -350,7 +539,7 @@ class MyThread(Thread):
                                                     ######## break ##############
                                                     if proxy_status[self.name] == 0: 
                                                         browser.close()
-                                                        my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                        my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
                                                         return
                                                     tr = elem.find_element_by_xpath("./ancestor::tr")
                                                     tc_name = tr.find_element_by_xpath("./td[2]/div[1]").text
@@ -363,13 +552,19 @@ class MyThread(Thread):
                                                     tt = elem.get_attribute("value")
                                                     if tt.find("Select") > -1:                                                
                                                         elem.click()
+
+                                                        if proxy_status[self.name] == 0: 
+                                                            browser.close()
+                                                            my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                            return
+                                                        
                                                         time.sleep(1)
                                                         tts = elem.find_elements_by_xpath("./ancestor::tr/td[3]/span[3]/div/table/tbody/tr/td/input")
                                                         for ttt in tts:
                                                             ######## break ##############
                                                             if proxy_status[self.name] == 0: 
                                                                 browser.close()
-                                                                my_logging(self.log, self.name, proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                                my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
                                                                 return
                                                             tttt = ttt.get_attribute("value")
                                                             print("time: " + str(tttt) + "  " + ("0" + location["t"])[-5:] )
@@ -377,7 +572,7 @@ class MyThread(Thread):
                                                                 print("time OK")
                                                                 if location["m"] == "" or (float(location["m"]) >= mile):                                                            
 
-                                                                    msg = msg.replace("%NAME", self.user["name"]).replace("%DATE", ddd_1).replace("%LOCATION", tc_address)
+                                                                    msg = os.environ.get("MESSAGE").replace("%NAME", self.user["name"]).replace("%DATE", ddd_1).replace("%LOCATION", tc_address).replace("%TIME", location["t"])
                                                                     if send_email(self.log, msg, self.user["name"], self.user["email"], self.user["phone"]): 
                                                                         send_ok = True   
 
@@ -398,7 +593,7 @@ class MyThread(Thread):
                                                                         elem.click()
                                                                         time.sleep(2)
                                                                         proxy_status[self.name] = 2
-                                                                        my_logging(self.log, self.name, " Message sent.") 
+                                                                        my_logging(self.log, self.user["name"], " Message sent.") 
                                                                         browser.close()
                                                                         return
                                                                     
@@ -410,11 +605,11 @@ class MyThread(Thread):
                                                         
                                                     else:
                                                         print("time: " + str(tt))
-                                                        if location["t"] != "" and str(tt) != location["t"]: continue
+                                                        if location["t"] != "" and (("0" + location["t"])[-5:] != str(tt)): continue
                                                         print("OK")
                                                         if location["m"] == "" or (float(location["m"]) >= mile):                                                        
 
-                                                            msg = msg.replace("%NAME", self.user["name"]).replace("%DATE", ddd_1).replace("%LOCATION", tc_address)
+                                                            msg = os.environ.get("MESSAGE").replace("%NAME", self.user["name"]).replace("%DATE", ddd_1).replace("%LOCATION", tc_address).replace("%TIME", location["t"])
                                                             if send_email(self.log, msg, self.name, self.user["email"], self.user["phone"]): 
                                                                 send_ok = True                                   
 
@@ -435,13 +630,44 @@ class MyThread(Thread):
                                                                 elem.click()
                                                                 time.sleep(2)
                                                                 proxy_status[self.name] = 2
-                                                                my_logging(self.log, self.name, " Message sent.") 
+                                                                my_logging(self.log, self.user["name"], " appointment found.") 
                                                                 browser.close()
                                                                 return
 
-                                            show_more, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[3]/div/div[1]/div/p[1]/a")
+                                            print("Before last_mile")
+
+                                            last_mile, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[3]/div/div[1]/div/span/table/tbody/tr[not(contains(@style, 'display: none;'))][last()]/td[4]")
+                                            print("After last_mile")
                                             if f == False : break
+                                            print("1")
+                                            
+                                            if proxy_status[self.name] == 0: 
+                                                browser.close()
+                                                my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                return
+                                            print("2")
+                                            
+                                            last_mile = float(re.split(" +", last_mile.text)[0])
+                                            print("3")
+                                            print("##" + location["m"] + "##  " + str(last_mile))
+                                            if location["m"] != "" and (float(location["m"]) < last_mile):
+                                                print("4")
+                                                my_logging(self.log, self.user["name"], str(last_mile) + " > " + location["m"])
+                                                print("5")
+                                                break     
+
+                                            print("Before show_more")                                       
+                                            show_more, f = find_elem(False, browser, browser, "//body/div[5]/div/div[3]/div[1]/div[4]/form/div/fieldset/div[3]/div/div[1]/div/p[1]/a")
+                                            print("After show_more")
+                                            if f == False : break
+
+                                            if proxy_status[self.name] == 0: 
+                                                browser.close()
+                                                my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                return
+                                            print("Before show_more.location_once_scrolled_into_view")
                                             show_more.location_once_scrolled_into_view
+                                            print("After show_more.location_once_scrolled_into_view")
                                             show_more.click()
 
                                             overlay, f = find_elem(False, browser, browser, "//*[@class='ui-widget-overlay ui-front']")
@@ -449,25 +675,40 @@ class MyThread(Thread):
                                                 while not f:
                                                     overlay, f = find_elem(False, browser, browser, "//*[@class='ui-widget-overlay ui-front']")
                                                     time.sleep(1)
+
+                                            if proxy_status[self.name] == 0: 
+                                                browser.close()
+                                                my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                return
+                                            
                                             print("overlay on")
                                             while f:
                                                 overlay, f = find_elem(False, browser, browser, "//*[@class='ui-widget-overlay ui-front']")
                                                 time.sleep(1)
+
+                                            if proxy_status[self.name] == 0: 
+                                                browser.close()
+                                                my_logging(self.log, self.user["name"], proxies_list[proxy_index] + ': Browser is stopped by admin.')
+                                                return
+                                            
                                             print("overlay off")
                                             # browser.find_element_by_tag_name('body').send_keys(Keys.HOME)
                                             time.sleep(2)
                                             # if location["c"] != "":
                                             #     if tc_address.find(location["c"]) < 0 :continue
-
-
+                                        print("breaked")
+                    print("Before Refresh")
+                    browser.refresh()
+                    print("After Refresh")
+                    time.sleep(5)
               
 
             except Exception as e: 
                 print(" Exception : " + e.args[0])
-                my_logging(self.log, self.name, " Exception : " + e.args[0])                    
+                my_logging(self.log, self.user["name"], " Exception : " + e.args[0])                    
                 if e.args[0] == "date_missed":                    
                     proxy_status[self.name] = 4
-                    my_logging(self.log, self.name, " Date Missed.")
+                    my_logging(self.log, self.user["name"], " Date Missed.")
                 if e.args[0] == "defer_cancel":
                     proxy_change = False
                     
